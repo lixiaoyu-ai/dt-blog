@@ -16,7 +16,7 @@ const fontMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: { default: "Deep Thoughts", template: "%s · Deep Thoughts" },
-  description: "记录技术、生活与思考。",
+  description: "Notes on technology, life, and ideas.",
 }
 
 export default function RootLayout({
@@ -26,7 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="zh-CN"
+      lang="en"
       suppressHydrationWarning
       className={cn(
         "antialiased",

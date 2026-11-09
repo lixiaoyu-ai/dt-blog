@@ -20,7 +20,7 @@ async function compileHeadings(source: string) {
   return getArticleHeadings(compiled.tableOfContents as Toc)
 }
 
-test("从真实 MDX 编译结果生成目录，保留中文、行内格式和重复标题的锚点", async () => {
+test("Builds a table of contents from compiled MDX with Chinese headings, inline formatting, and duplicate headings", async () => {
   const headings = await compileHeadings(
     [
       "---",
@@ -50,7 +50,7 @@ test("从真实 MDX 编译结果生成目录，保留中文、行内格式和重
   ])
 })
 
-test("识别 Setext 标题和跳级标题，并保留一到六级标题", async () => {
+test("Recognizes Setext headings and preserves levels one through six, including skipped levels", async () => {
   const headings = await compileHeadings(
     [
       "文章标题",
@@ -76,7 +76,7 @@ test("识别 Setext 标题和跳级标题，并保留一到六级标题", async 
   )
 })
 
-test("没有正文标题时返回空目录，围栏与 MDX 组件不会伪造标题", async () => {
+test("Returns an empty table of contents when headings appear only in code or MDX component props", async () => {
   assert.deepEqual(
     await compileHeadings(
       [

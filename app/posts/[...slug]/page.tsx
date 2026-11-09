@@ -12,20 +12,20 @@ import ArticleImage from "@/components/mdx/article-image"
 import PostTableOfContents from "@/components/post-table-of-contents"
 
 type PostPageProps = {
-  params: Promise<{ slug: string }>
+  params: Promise<{ slug: string[] }>
 }
 
 export const dynamicParams = false
 
 export async function generateStaticParams() {
-  return (await getAllPosts()).map((post) => ({ slug: post.slug }))
+  return (await getAllPosts()).map((post) => ({ slug: post.slug.split("/") }))
 }
 
 export async function generateMetadata({
   params,
 }: PostPageProps): Promise<Metadata> {
   const { slug } = await params
-  const post = await getPostBySlug(slug)
+  const post = await getPostBySlug(slug.join("/"))
   if (!post) notFound()
 
   return {
@@ -44,11 +44,11 @@ export async function generateMetadata({
 
 export default async function PostPage({ params }: PostPageProps) {
   const { slug } = await params
-  const post = await getPostBySlug(slug)
+  const post = await getPostBySlug(slug.join("/"))
   if (!post) notFound()
 
   const { default: Content, tableOfContents } = await import(
-    `@/content/posts/${slug}/index.mdx`
+    `@/content/posts/${post.slug}/index.mdx`
   )
   const headings = getArticleHeadings(tableOfContents)
 
@@ -66,7 +66,7 @@ export default async function PostPage({ params }: PostPageProps) {
           className="inline-flex min-h-11 items-center gap-2 rounded-sm text-sm text-muted-foreground hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
         >
           <ArrowLeftIcon aria-hidden="true" className="size-4" />
-          返回文章列表
+          Back to posts
         </Link>
 
         <header className="mt-6 space-y-5">
@@ -76,7 +76,7 @@ export default async function PostPage({ params }: PostPageProps) {
             </time>
             {post.updatedAt && (
               <span>
-                更新于{" "}
+                Updated on{" "}
                 <time dateTime={post.updatedAt}>
                   {formatPostDate(post.updatedAt)}
                 </time>
@@ -89,7 +89,7 @@ export default async function PostPage({ params }: PostPageProps) {
           <p className="text-base leading-8 text-muted-foreground">
             {post.description}
           </p>
-          <ul aria-label="文章标签" className="flex flex-wrap gap-2">
+          <ul aria-label="Post tags" className="flex flex-wrap gap-2">
             {post.tags.map((tag) => (
               <li
                 key={tag}
@@ -113,14 +113,14 @@ export default async function PostPage({ params }: PostPageProps) {
       </div>
 
       {headings.length > 0 && (
-        <PostTableOfContents key={slug} headings={headings} />
+        <PostTableOfContents key={post.slug} headings={headings} />
       )}
 
       <div className="typeset typeset-blog mt-10 max-w-[75ch] min-w-0 lg:col-start-1 lg:row-start-2">
         <Content
           components={{
             img: (props: ComponentProps<"img">) => (
-              <ArticleImage {...props} slug={slug} />
+              <ArticleImage {...props} slug={post.slug} />
             ),
           }}
         />

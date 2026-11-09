@@ -8,7 +8,7 @@ import {
   parsePostPage,
 } from "../lib/post-pagination"
 
-test("根据每页六篇文章生成静态分页，空列表仍生成首页", () => {
+test("Generates pages of six posts and keeps a homepage for an empty list", () => {
   for (const count of [0, 1, 6]) {
     assert.equal(getTotalPostPages(count), 1)
     assert.deepEqual(getPostPageParams(count), [{ pagination: [] }])
@@ -26,7 +26,7 @@ test("根据每页六篇文章生成静态分页，空列表仍生成首页", ()
   ])
 })
 
-test("页码路径、首页链接与解析结果一致，拒绝重复首页和无效路径", () => {
+test("Builds and parses page URLs and rejects duplicate homepages and invalid paths", () => {
   assert.equal(getPostPageHref(1), "/")
   assert.equal(getPostPageHref(2), "/page/2")
   assert.equal(parsePostPage(), 1)

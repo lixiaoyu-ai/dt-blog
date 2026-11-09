@@ -25,7 +25,7 @@ const contentTypes = {
 try {
   await stat(path.join(directory, "index.html"))
 } catch {
-  console.error("找不到 out/index.html，请先运行 pnpm build。")
+  console.error("Could not find out/index.html. Run pnpm build first.")
   process.exit(1)
 }
 
@@ -81,5 +81,5 @@ const server = createServer(async (request, response) => {
 })
 
 server.listen(port, "127.0.0.1", () => {
-  console.log(`静态预览：http://localhost:${port}`)
+  console.log(`Static preview available at http://localhost:${port}`)
 })

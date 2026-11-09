@@ -3,12 +3,17 @@ import Link from "next/link"
 import { ArrowRightIcon } from "lucide-react"
 
 import { groupPostsByYear } from "@/lib/post-archives"
-import { formatPostDate, getAllPosts } from "@/lib/posts"
+import { formatPostCount, formatPostDate, getAllPosts } from "@/lib/posts"
 
 export const metadata: Metadata = {
-  title: "归档",
-  description: "按年份与月份翻阅 Deep Thoughts 的全部文章。",
+  title: "Archives",
+  description: "Browse all posts on Deep Thoughts by year and month.",
 }
+
+const monthFormatter = new Intl.DateTimeFormat("en-US", {
+  month: "long",
+  timeZone: "UTC",
+})
 
 export default async function ArchivesPage() {
   const posts = await getAllPosts()
@@ -18,10 +23,10 @@ export default async function ArchivesPage() {
     <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 sm:py-16">
       <header>
         <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
-          文章归档
+          Post archives
         </h1>
         <p className="mt-5 text-sm leading-7 text-muted-foreground">
-          共 {posts.length} 篇文章，按年份与月份整理。
+          Browse {formatPostCount(posts.length)} by year and month.
         </p>
       </header>
 
@@ -43,7 +48,7 @@ export default async function ArchivesPage() {
                     {year}
                   </h2>
                   <p className="text-sm text-muted-foreground sm:mt-2">
-                    {postCount} 篇
+                    {formatPostCount(postCount)}
                   </p>
                 </header>
 
@@ -59,10 +64,12 @@ export default async function ArchivesPage() {
                       />
                       <div className="flex items-baseline gap-3">
                         <h3 className="text-base font-medium">
-                          {Number(month)} 月
+                          {monthFormatter.format(
+                            new Date(`${year}-${month}-01T00:00:00Z`)
+                          )}
                         </h3>
                         <span className="text-xs text-muted-foreground">
-                          {monthPosts.length} 篇
+                          {formatPostCount(monthPosts.length)}
                         </span>
                       </div>
 
@@ -78,7 +85,7 @@ export default async function ArchivesPage() {
                                 title={formatPostDate(post.publishedAt)}
                                 className="w-10 shrink-0 text-sm leading-7 text-muted-foreground tabular-nums"
                               >
-                                {post.publishedAt.slice(8)} 日
+                                {post.publishedAt.slice(8)}
                               </time>
                               <span className="min-w-0 flex-1 text-base leading-7 font-medium [overflow-wrap:anywhere]">
                                 {post.title}
@@ -100,10 +107,10 @@ export default async function ArchivesPage() {
 
           {years.length > 1 && (
             <nav
-              aria-label="按年份跳转"
+              aria-label="Jump to year"
               className="sticky top-8 hidden border-l pl-5 md:block"
             >
-              <h2 className="text-sm font-medium">按年份</h2>
+              <h2 className="text-sm font-medium">By year</h2>
               <ul className="mt-3 space-y-1">
                 {years.map(({ year, postCount }) => (
                   <li key={year}>
@@ -112,7 +119,9 @@ export default async function ArchivesPage() {
                       className="flex min-h-11 items-center justify-between gap-4 rounded-sm text-sm text-muted-foreground tabular-nums transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
                     >
                       <span>{year}</span>
-                      <span className="text-xs">{postCount} 篇</span>
+                      <span className="text-xs">
+                        {formatPostCount(postCount)}
+                      </span>
                     </a>
                   </li>
                 ))}
@@ -122,7 +131,7 @@ export default async function ArchivesPage() {
         </div>
       ) : (
         <p className="py-16 text-sm text-muted-foreground">
-          还没有发布文章，敬请期待。
+          No posts have been published yet.
         </p>
       )}
     </div>

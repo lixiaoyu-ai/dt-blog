@@ -3,6 +3,7 @@ import "server-only"
 import { createHash } from "node:crypto"
 import { readdir, readFile, realpath } from "node:fs/promises"
 import path from "node:path"
+import { isPostSlug } from "./post-slug"
 
 const imageTypes: Record<string, string> = {
   ".avif": "image/avif",
@@ -33,12 +34,12 @@ function imagePathSegments(relativePath: string) {
 
 export function getPostAssetUrl(slug: string, relativePath: string) {
   const segments = imagePathSegments(relativePath)
-  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || !segments) {
+  if (!isPostSlug(slug) || !segments) {
     throw new Error(
-      "图片必须使用文章目录内的相对路径，例如 ./cover.svg 或 ./images/photo.webp"
+      "Use a relative image path within the post directory, such as ./cover.svg or ./images/photo.webp."
     )
   }
-  return `/posts/${slug}/assets/${segments.map(encodeURIComponent).join("/")}`
+  return `/post-assets/${slug}/${segments.map(encodeURIComponent).join("/")}`
 }
 
 export function getPostMarkdownImageUrl(slug: string, relativeUrl: string) {

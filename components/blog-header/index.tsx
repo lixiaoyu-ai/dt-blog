@@ -18,9 +18,9 @@ import {
 } from "@/components/ui/sheet"
 
 const navigationItems = [
-  { label: "首页", href: "/" },
-  { label: "归档", href: "/archives" },
-  { label: "关于", href: "/about" },
+  { label: "Home", href: "/" },
+  { label: "Archives", href: "/archives" },
+  { label: "About", href: "/about" },
 ]
 
 const brandClassName =
@@ -52,7 +52,7 @@ export default function BlogHeader() {
           Deep Thoughts
         </Link>
 
-        <nav aria-label="主导航" className="hidden md:block">
+        <nav aria-label="Main navigation" className="hidden md:block">
           <ul className="flex items-center gap-2">
             {navigationItems.map((item) => (
               <li key={item.label}>
@@ -68,7 +68,7 @@ export default function BlogHeader() {
                   <span className="inline-flex min-h-11 items-center gap-2 px-4 text-sm text-muted-foreground">
                     {item.label}
                     <span className="rounded-full bg-muted px-2 py-0.5 text-xs">
-                      即将上线
+                      Coming soon
                     </span>
                   </span>
                 )}
@@ -81,7 +81,7 @@ export default function BlogHeader() {
           <ThemeToggle />
           <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
             <SheetTrigger
-              aria-label="打开导航菜单"
+              aria-label="Open navigation menu"
               render={
                 <Button
                   variant="ghost"
@@ -99,7 +99,7 @@ export default function BlogHeader() {
               className="max-h-svh gap-0 overflow-y-auto overscroll-contain rounded-b-md shadow-sm duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] data-[side=top]:data-ending-style:-translate-y-full data-[side=top]:data-starting-style:-translate-y-full motion-reduce:transition-none"
             >
               <SheetHeader className="h-16 shrink-0 flex-row items-center justify-between px-6 py-0">
-                <SheetTitle className="sr-only">站点导航</SheetTitle>
+                <SheetTitle className="sr-only">Site navigation</SheetTitle>
                 <SheetClose
                   nativeButton={false}
                   render={<Link href="/" />}
@@ -110,7 +110,7 @@ export default function BlogHeader() {
                 <div className="flex items-center gap-1">
                   <ThemeToggle />
                   <SheetClose
-                    aria-label="关闭导航菜单"
+                    aria-label="Close navigation menu"
                     render={
                       <Button
                         variant="ghost"
@@ -124,7 +124,7 @@ export default function BlogHeader() {
                 </div>
               </SheetHeader>
 
-              <nav aria-label="主导航" className="px-6 pt-2 pb-4">
+              <nav aria-label="Main navigation" className="px-6 pt-2 pb-4">
                 <ul className="divide-y">
                   {navigationItems.map((item) => (
                     <li key={item.label}>
@@ -149,7 +149,7 @@ export default function BlogHeader() {
                             {item.label}
                           </span>
                           <span className="rounded-full bg-muted px-2.5 py-1 text-xs">
-                            即将上线
+                            Coming soon
                           </span>
                         </div>
                       )}
@@ -159,7 +159,7 @@ export default function BlogHeader() {
               </nav>
 
               <SheetDescription className="border-t px-6 py-5 text-sm leading-relaxed">
-                记录技术、生活与思考。
+                Notes on technology, life, and ideas.
               </SheetDescription>
             </SheetContent>
           </Sheet>

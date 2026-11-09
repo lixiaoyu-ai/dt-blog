@@ -31,12 +31,12 @@ export default async function MdxCodeBlock({
     <CodeBlock className="my-6">
       {source !== undefined && (
         <CodeBlockHeader>
-          <CodeBlockTitle>{language?.toUpperCase() ?? "代码"}</CodeBlockTitle>
+          <CodeBlockTitle>{language?.toUpperCase() ?? "Code"}</CodeBlockTitle>
           <CodeBlockActions>
             <CodeBlockCopyButton
               value={source}
-              aria-label="复制代码"
-              title="复制代码"
+              aria-label="Copy code"
+              title="Copy code"
               className="size-11"
             />
           </CodeBlockActions>
@@ -44,7 +44,7 @@ export default async function MdxCodeBlock({
       )}
       <CodeBlockContent
         role="region"
-        aria-label="代码块"
+        aria-label="Code block"
         {...props}
         className={className}
         lineNumbers={source !== undefined}

@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import PostCard from "@/components/post-card"
 import PostPagination from "@/components/post-pagination"
-import { getAllPosts } from "@/lib/posts"
+import { formatPostCount, getAllPosts } from "@/lib/posts"
 import {
   getPostPageParams,
   getTotalPostPages,
@@ -24,7 +24,7 @@ export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const page = parsePostPage((await params).pagination)
-  return page && page > 1 ? { title: `文章列表 · 第 ${page} 页` } : {}
+  return page && page > 1 ? { title: `Posts · Page ${page}` } : {}
 }
 
 export default async function Page({ params }: PageProps) {
@@ -44,8 +44,10 @@ export default async function Page({ params }: PageProps) {
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
       <header className="mb-6 flex items-baseline justify-between gap-4">
-        <h1 className="text-2xl font-semibold tracking-tight">最新文章</h1>
-        <p className="text-sm text-muted-foreground">{posts.length} 篇文章</p>
+        <h1 className="text-2xl font-semibold tracking-tight">Latest posts</h1>
+        <p className="text-sm text-muted-foreground">
+          {formatPostCount(posts.length)}
+        </p>
       </header>
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {visiblePosts.map((post, index) => (
@@ -53,7 +55,7 @@ export default async function Page({ params }: PageProps) {
         ))}
         {posts.length === 0 && (
           <p className="col-span-full py-16 text-center text-sm text-muted-foreground">
-            还没有发布文章，敬请期待。
+            No posts have been published yet.
           </p>
         )}
       </div>

@@ -4,114 +4,120 @@ import { readdir, readFile } from "node:fs/promises"
 import path from "node:path"
 import { cache } from "react"
 import matter from "gray-matter"
+import { z } from "zod"
 import { getPostAssetUrl } from "./post-assets"
+import { isPostSlug } from "./post-slug"
 
-export type PostMetadata = {
-  slug: string
-  title: string
-  description: string
-  publishedAt: string
-  updatedAt?: string
-  cover: string
-  tags: string[]
-  draft: boolean
+const postsDirectory = path.join(process.cwd(), "content", "posts")
+const coverError =
+  "must be a relative image path within the post directory, such as ./cover.svg"
+const tagsError = "must be an array of non-empty strings"
+
+function nonEmptyText(error = "must be a non-empty string") {
+  return z.string({ error }).trim().min(1, { error })
 }
 
-const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
-const postsDirectory = path.join(process.cwd(), "content", "posts")
+const postDate = nonEmptyText().pipe(
+  z.iso.date({
+    error:
+      'must be a valid date in "YYYY-MM-DD" format. Quote the value in frontmatter.',
+  })
+)
+
+const postMetadataSchema = z
+  .object({
+    slug: z.string(),
+    title: nonEmptyText(),
+    description: nonEmptyText(),
+    publishedAt: postDate,
+    updatedAt: postDate.optional(),
+    cover: nonEmptyText(coverError),
+    tags: z
+      .array(nonEmptyText(tagsError), { error: tagsError })
+      .transform((tags) => [...new Set(tags)]),
+    draft: z.boolean({ error: "must be true or false" }),
+  })
+  .refine(
+    ({ publishedAt, updatedAt }) =>
+      updatedAt === undefined || updatedAt >= publishedAt,
+    { path: ["updatedAt"], error: "must be on or after publishedAt" }
+  )
+  .transform(({ updatedAt, ...metadata }, ctx) => {
+    try {
+      return {
+        ...metadata,
+        ...(updatedAt && { updatedAt }),
+        cover: getPostAssetUrl(metadata.slug, metadata.cover),
+      }
+    } catch {
+      ctx.issues.push({
+        code: "custom",
+        path: ["cover"],
+        message: coverError,
+        input: metadata.cover,
+      })
+      return z.NEVER
+    }
+  })
+
+export type PostMetadata = z.output<typeof postMetadataSchema>
 
 function parseMetadata(
   slug: string,
   data: Record<string, unknown>
 ): PostMetadata {
-  function invalid(field: string, message: string): never {
-    throw new Error(`content/posts/${slug}/index.mdx: ${field} ${message}`)
+  const result = postMetadataSchema.safeParse({ ...data, slug })
+  if (!result.success) {
+    const [issue] = result.error.issues
+    throw new Error(
+      `content/posts/${slug}/index.mdx: ${issue.path.join(".")} ${issue.message}`
+    )
   }
-
-  function text(field: string): string {
-    const value = data[field]
-    if (typeof value !== "string" || !value.trim()) {
-      return invalid(field, "必须是非空字符串")
-    }
-    return value.trim()
-  }
-
-  function date(field: string): string {
-    const value = text(field)
-    const parsed = new Date(`${value}T00:00:00Z`)
-    if (
-      !/^\d{4}-\d{2}-\d{2}$/.test(value) ||
-      Number.isNaN(parsed.getTime()) ||
-      parsed.toISOString().slice(0, 10) !== value
-    ) {
-      return invalid(field, '必须是有效日期，格式为 "YYYY-MM-DD"（请加引号）')
-    }
-    return value
-  }
-
-  let cover: string
-  try {
-    cover = getPostAssetUrl(slug, text("cover"))
-  } catch {
-    invalid("cover", "必须是文章目录内的图片相对路径，例如 ./cover.svg")
-  }
-  if (typeof data.draft !== "boolean") {
-    invalid("draft", "必须是 true 或 false")
-  }
-  if (
-    !Array.isArray(data.tags) ||
-    !data.tags.every((tag) => typeof tag === "string" && tag.trim())
-  ) {
-    invalid("tags", "必须是字符串数组")
-  }
-
-  const publishedAt = date("publishedAt")
-  const updatedAt = data.updatedAt === undefined ? undefined : date("updatedAt")
-  if (updatedAt && updatedAt < publishedAt) {
-    invalid("updatedAt", "不能早于 publishedAt")
-  }
-
-  return {
-    slug,
-    title: text("title"),
-    description: text("description"),
-    publishedAt,
-    ...(updatedAt && { updatedAt }),
-    cover,
-    tags: [...new Set((data.tags as string[]).map((tag) => tag.trim()))],
-    draft: data.draft as boolean,
-  }
+  return result.data
 }
 
-export async function readPostsFromDirectory(
-  directory: string
+async function readPostTree(
+  directory: string,
+  slug = ""
 ): Promise<PostMetadata[]> {
   let entries
   try {
     entries = await readdir(directory, { withFileTypes: true })
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") return []
+    if (!slug && (error as NodeJS.ErrnoException).code === "ENOENT") return []
     throw error
   }
 
-  const posts = await Promise.all(
+  if (
+    slug &&
+    entries.some((entry) => entry.name === "index.mdx" && entry.isFile())
+  ) {
+    const source = await readFile(path.join(directory, "index.mdx"), "utf8")
+    return [parseMetadata(slug, matter(source).data)]
+  }
+
+  const branches = await Promise.all(
     entries
       .filter((entry) => entry.isDirectory())
       .map(async (entry) => {
-        if (!slugPattern.test(entry.name)) {
+        if (!isPostSlug(entry.name)) {
           throw new Error(
-            `文章目录名称必须使用小写英文、数字和连字符：${entry.name}`
+            `Invalid post directory name "${entry.name}". Use lowercase letters, numbers, and hyphens.`
           )
         }
-        const source = await readFile(
-          path.join(directory, entry.name, "index.mdx"),
-          "utf8"
+        return readPostTree(
+          path.join(directory, entry.name),
+          slug ? `${slug}/${entry.name}` : entry.name
         )
-        return parseMetadata(entry.name, matter(source).data)
       })
   )
+  return branches.flat()
+}
 
-  return posts
+export async function readPostsFromDirectory(
+  directory: string
+): Promise<PostMetadata[]> {
+  return (await readPostTree(directory))
     .filter((post) => !post.draft)
     .sort(
       (left, right) =>
@@ -123,15 +129,19 @@ export async function readPostsFromDirectory(
 export const getAllPosts = cache(() => readPostsFromDirectory(postsDirectory))
 
 export async function getPostBySlug(slug: string) {
-  if (!slugPattern.test(slug)) return undefined
+  if (!isPostSlug(slug)) return undefined
   return (await getAllPosts()).find((post) => post.slug === slug)
 }
 
 export function formatPostDate(date: string) {
-  return new Intl.DateTimeFormat("zh-CN", {
+  return new Intl.DateTimeFormat("en-US", {
     year: "numeric",
-    month: "long",
+    month: "short",
     day: "numeric",
     timeZone: "UTC",
   }).format(new Date(`${date}T00:00:00Z`))
+}
+
+export function formatPostCount(count: number) {
+  return `${count} ${count === 1 ? "post" : "posts"}`
 }

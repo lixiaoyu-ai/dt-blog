@@ -13,9 +13,9 @@ export function ThemeToggle() {
       type="button"
       variant="ghost"
       size="icon"
-      aria-label="切换明暗模式"
+      aria-label="Toggle color theme"
       aria-keyshortcuts="D"
-      title="切换明暗模式（D）"
+      title="Toggle color theme (D)"
       onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
       className="size-11 text-muted-foreground hover:text-foreground [&_svg]:size-5"
     >

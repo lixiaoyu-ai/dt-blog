@@ -40,7 +40,7 @@ export default function PostCard({
             </p>
             <div className="mt-auto flex items-end justify-between gap-3 pt-2">
               <ul
-                aria-label="文章标签"
+                aria-label="Post tags"
                 className="flex min-w-0 flex-1 flex-wrap gap-2"
               >
                 {post.tags.map((tag) => (

@@ -14,14 +14,14 @@ function post(
     title: slug,
     description: "归档测试文章",
     publishedAt,
-    cover: `/posts/${slug}/assets/cover.svg`,
+    cover: `/post-assets/${slug}/cover.svg`,
     tags: [],
     draft: false,
     ...overrides,
   }
 }
 
-test("跨年、跨月分组并按发布日期降序，同日按 slug 排序", () => {
+test("Groups posts by year and month and sorts by date, then slug", () => {
   const posts = [
     post("old-december", "2025-12-31", { updatedAt: "2026-11-09" }),
     post("zeta", "2026-11-08"),
@@ -68,7 +68,7 @@ test("跨年、跨月分组并按发布日期降序，同日按 slug 排序", ()
   )
 })
 
-test("空列表与全部为草稿时都不生成年份或月份", () => {
+test("Returns no archive groups when the list is empty or contains only drafts", () => {
   assert.deepEqual(groupPostsByYear([]), [])
   assert.deepEqual(
     groupPostsByYear([post("draft", "2026-11-08", { draft: true })]),

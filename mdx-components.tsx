@@ -18,7 +18,7 @@ const components = {
   pre: MdxCodeBlock,
   table: ({ className, ...props }) => (
     <Table
-      aria-label="文章表格"
+      aria-label="Article table"
       tabIndex={0}
       {...props}
       className={cn(

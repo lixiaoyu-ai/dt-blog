@@ -28,7 +28,7 @@ async function fixture(
   await Promise.all(
     Object.entries(posts).map(async ([slug, data]) => {
       const folder = path.join(directory, slug)
-      await mkdir(folder)
+      await mkdir(folder, { recursive: true })
       await writeFile(
         path.join(folder, "index.mdx"),
         `---\n${JSON.stringify(data)}\n---\n\n## 正文\n`
@@ -38,7 +38,7 @@ async function fixture(
   return directory
 }
 
-test("读取元信息，过滤草稿，并按日期及 slug 稳定排序", async (t) => {
+test("Reads metadata, filters drafts, and sorts by date and slug", async (t) => {
   const directory = await fixture(t, {
     zeta: metadata,
     alpha: { ...metadata, title: "另一篇文章" },
@@ -53,10 +53,27 @@ test("读取元信息，过滤草稿，并按日期及 slug 稳定排序", async
   )
   assert.equal(posts[0].title, "另一篇文章")
   assert.equal(posts[0].description, metadata.description)
-  assert.equal(posts[0].cover, "/posts/alpha/assets/cover.svg")
+  assert.equal(posts[0].cover, "/post-assets/alpha/cover.svg")
 })
 
-test("没有文章时返回空列表", async (t) => {
+test("Discovers nested posts and stops scanning once a directory contains index.mdx", async (t) => {
+  const directory = await fixture(t, {
+    "notes/typescript/intro": metadata,
+    "tutorials/intro": metadata,
+    "notes/typescript/intro/images/ignored": { ...metadata, title: "" },
+    "notes/drafts/hidden": { ...metadata, draft: true },
+  })
+  await mkdir(path.join(directory, "empty"))
+
+  const posts = await readPostsFromDirectory(directory)
+  assert.deepEqual(
+    posts.map((post) => post.slug),
+    ["notes/typescript/intro", "tutorials/intro"]
+  )
+  assert.equal(posts[0].cover, "/post-assets/notes/typescript/intro/cover.svg")
+})
+
+test("Returns an empty list when there are no posts", async (t) => {
   const directory = await fixture(t, {})
   assert.deepEqual(await readPostsFromDirectory(directory), [])
   assert.deepEqual(
@@ -65,7 +82,7 @@ test("没有文章时返回空列表", async (t) => {
   )
 })
 
-test("校验真实日期、必填字段和草稿标记，错误包含文章路径", async (t) => {
+test("Reports invalid metadata with the post path and field name", async (t) => {
   for (const [field, value] of [
     ["publishedAt", "2026-02-30"],
     ["title", ""],
@@ -74,16 +91,16 @@ test("校验真实日期、必填字段和草稿标记，错误包含文章路�
     ["cover", "../secret.png"],
   ] as const) {
     const directory = await fixture(t, {
-      example: { ...metadata, [field]: value },
+      "category/example": { ...metadata, [field]: value },
     })
     await assert.rejects(
       () => readPostsFromDirectory(directory),
-      new RegExp(`content/posts/example/index.mdx: ${field}`)
+      new RegExp(`content/posts/category/example/index.mdx: ${field}`)
     )
   }
 })
 
-test("保留更新时间并规范化标签，更新时间不能早于发布日期", async (t) => {
+test("Normalizes tags and requires the update date to follow publication", async (t) => {
   const directory = await fixture(t, {
     example: {
       ...metadata,
@@ -98,15 +115,21 @@ test("保留更新时间并规范化标签，更新时间不能早于发布日�
   const invalid = await fixture(t, {
     example: { ...metadata, updatedAt: "2026-11-01" },
   })
-  await assert.rejects(() => readPostsFromDirectory(invalid), /updatedAt/)
+  await assert.rejects(
+    () => readPostsFromDirectory(invalid),
+    /updatedAt must be on or after publishedAt/
+  )
 })
 
-test("目录 slug 保持小写英文和连字符", async (t) => {
+test("Rejects post slugs with characters other than lowercase letters, numbers, and hyphens", async (t) => {
   const directory = await fixture(t, { "Invalid Slug": metadata })
-  await assert.rejects(() => readPostsFromDirectory(directory), /Invalid Slug/)
+  await assert.rejects(
+    () => readPostsFromDirectory(directory),
+    /Invalid post directory name "Invalid Slug"/
+  )
 })
 
-test("仓库示例可读取，未知 slug 和路径穿越不能读取文章", async () => {
+test("Reads published examples and rejects unknown slugs and path traversal", async () => {
   const posts = await getAllPosts()
   assert(posts.some((post) => post.slug === "mdx-and-charts"))
   assert.equal((await getPostBySlug("mdx-and-charts"))?.draft, false)

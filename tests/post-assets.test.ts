@@ -22,14 +22,14 @@ async function fixture(t: TestContext) {
   return root
 }
 
-test("文章图片的相对路径和中文文件名生成稳定的访问地址", () => {
+test("Builds stable image URLs from relative paths and Chinese filenames", () => {
   assert.equal(
     getPostAssetUrl("my-post", "./cover.svg"),
-    "/posts/my-post/assets/cover.svg"
+    "/post-assets/my-post/cover.svg"
   )
   assert.equal(
-    getPostAssetUrl("my-post", "./images/配图.svg"),
-    `/posts/my-post/assets/images/${encodeURIComponent("配图.svg")}`
+    getPostAssetUrl("notes/typescript/my-post", "./images/配图.svg"),
+    `/post-assets/notes/typescript/my-post/images/${encodeURIComponent("配图.svg")}`
   )
   for (const value of [
     "../cover.svg",
@@ -38,11 +38,25 @@ test("文章图片的相对路径和中文文件名生成稳定的访问地址",
     "./images/../../cover.png",
     "./cover.svg?raw",
   ]) {
-    assert.throws(() => getPostAssetUrl("my-post", value), /相对路径/)
+    assert.throws(
+      () => getPostAssetUrl("my-post", value),
+      /relative image path/
+    )
+  }
+  for (const slug of [
+    "/my-post",
+    "notes/../my-post",
+    "notes//my-post",
+    "notes/Invalid",
+  ]) {
+    assert.throws(
+      () => getPostAssetUrl(slug, "./cover.svg"),
+      /relative image path/
+    )
   }
 })
 
-test("读取文章目录内的图片，文件内容变化时更新缓存标识", async (t) => {
+test("Reads post images and updates the cache tag when the file changes", async (t) => {
   const root = await fixture(t)
   const image = await readPostImage(root, ["cover.svg"])
   assert.equal(image?.contentType, "image/svg+xml")
@@ -62,7 +76,7 @@ test("读取文章目录内的图片，文件内容变化时更新缓存标识",
   )
 })
 
-test("Markdown 图片路径只编码一次，保留中文、空格与文件名中的百分号", () => {
+test("Encodes Markdown image paths once, preserving Chinese characters, spaces, and percent signs", () => {
   assert.equal(
     getPostMarkdownImageUrl("my-post", "./images/%E9%85%8D%E5%9B%BE%201.svg"),
     getPostAssetUrl("my-post", "./images/配图 1.svg")
@@ -77,11 +91,11 @@ test("Markdown 图片路径只编码一次，保留中文、空格与文件名�
   )
   assert.throws(
     () => getPostMarkdownImageUrl("my-post", "./%2E%2E/cover.svg"),
-    /相对路径/
+    /relative image path/
   )
 })
 
-test("资源读取拒绝越界路径、正文和数据文件", async (t) => {
+test("Rejects paths outside the post directory and blocks source and data files", async (t) => {
   const root = await fixture(t)
   await writeFile(path.join(root, "index.mdx"), "private draft text")
   await writeFile(path.join(root, "chart-data.json"), "[]")
@@ -96,7 +110,7 @@ test("资源读取拒绝越界路径、正文和数据文件", async (t) => {
   }
 })
 
-test("符号链接不能越过文章目录或将正文伪装成图片", async (t) => {
+test("Rejects symlinks outside the post directory and symlinks that disguise source files as images", async (t) => {
   const root = await fixture(t)
   const outside = await fixture(t)
   await symlink(path.join(outside, "cover.svg"), path.join(root, "outside.svg"))
@@ -107,7 +121,7 @@ test("符号链接不能越过文章目录或将正文伪装成图片", async (t
   assert.equal(await readPostImage(root, ["source.svg"]), undefined)
 })
 
-test("静态导出只收集真实图片，跳过正文、数据、隐藏文件和符号链接", async (t) => {
+test("Collects images for export while skipping source files, data, hidden files, and symlinks", async (t) => {
   const root = await fixture(t)
   const outside = await fixture(t)
   await mkdir(path.join(root, ".private"))

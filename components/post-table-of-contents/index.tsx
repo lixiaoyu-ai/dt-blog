@@ -114,8 +114,8 @@ export default function PostTableOfContents({
       ref={container}
       className="mt-6 min-w-0 lg:sticky lg:top-8 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mt-14"
     >
-      <nav aria-label="文章目录" className="hidden lg:block">
-        <h2 className="mb-3 text-sm font-medium">文章目录</h2>
+      <nav aria-label="Table of contents" className="hidden lg:block">
+        <h2 className="mb-3 text-sm font-medium">Table of contents</h2>
         <ScrollArea className="[&_[data-slot=scroll-area-viewport]]:max-h-[calc(100svh-12rem)]">
           {renderLinks()}
         </ScrollArea>
@@ -135,9 +135,9 @@ export default function PostTableOfContents({
           }
         >
           <ListIcon aria-hidden="true" className="size-4" />
-          文章目录
+          Table of contents
           <span className="ml-auto text-xs text-muted-foreground">
-            {headings.length} 项
+            {headings.length} {headings.length === 1 ? "section" : "sections"}
           </span>
           <ChevronDownIcon
             aria-hidden="true"
@@ -148,7 +148,7 @@ export default function PostTableOfContents({
           />
         </CollapsibleTrigger>
         <CollapsibleContent className="border-t">
-          <nav aria-label="文章目录" className="p-3">
+          <nav aria-label="Table of contents" className="p-3">
             <ScrollArea className="[&_[data-slot=scroll-area-viewport]]:max-h-[60svh]">
               {renderLinks(true)}
             </ScrollArea>

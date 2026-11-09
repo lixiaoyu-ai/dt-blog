@@ -1,6 +1,6 @@
 import path from "node:path"
 
-import { getAllPosts, getPostBySlug } from "@/lib/posts"
+import { getAllPosts } from "@/lib/posts"
 import {
   getPostAssetUrl,
   getPostImagePaths,
@@ -23,9 +23,14 @@ export async function generateStaticParams() {
             getPostAssetUrl(post.slug, assetPath.join("/")) === post.cover
         )
       ) {
-        throw new Error(`content/posts/${post.slug}/index.mdx: 封面图片不存在`)
+        throw new Error(
+          `content/posts/${post.slug}/index.mdx: cover image not found`
+        )
       }
-      return images.map((assetPath) => ({ slug: post.slug, assetPath }))
+      const slugSegments = post.slug.split("/")
+      return images.map((assetPath) => ({
+        assetPath: [...slugSegments, ...assetPath],
+      }))
     })
   )
   return params.flat()
@@ -33,14 +38,23 @@ export async function generateStaticParams() {
 
 export async function GET(
   _request: Request,
-  { params }: { params: Promise<{ slug: string; assetPath: string[] }> }
+  { params }: { params: Promise<{ assetPath: string[] }> }
 ) {
-  const { slug, assetPath } = await params
-  if (!(await getPostBySlug(slug))) return new Response(null, { status: 404 })
+  const { assetPath } = await params
+  if (assetPath.some((segment) => segment.includes("/"))) {
+    return new Response(null, { status: 404 })
+  }
+
+  // Post directories are leaves, so only one published slug can own this path.
+  const requestedPath = assetPath.join("/")
+  const post = (await getAllPosts()).find(({ slug }) =>
+    requestedPath.startsWith(`${slug}/`)
+  )
+  if (!post) return new Response(null, { status: 404 })
 
   const image = await readPostImage(
-    path.join(process.cwd(), "content", "posts", slug),
-    assetPath
+    path.join(process.cwd(), "content", "posts", post.slug),
+    assetPath.slice(post.slug.split("/").length)
   )
   if (!image) return new Response(null, { status: 404 })
 

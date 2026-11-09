@@ -31,20 +31,20 @@ pnpm start
 
 - 首页是 `/`，后续页为 `/page/2/`、`/page/3/`，每页 6 篇；只生成实际存在的分页，越界或未知路径返回 404。
 - `trailingSlash: true` 将页面导出为目录内的 `index.html`，方便静态托管直接访问深层页面；静态主机需支持目录首页，并将找不到的路径返回 `404.html` 和 404 状态码。
-- 图片通过静态 `GET` 路由在构建时输出到 `out/posts/<slug>/assets/`。无需维护第二份图片目录，开发与部署使用相同的资源地址。
+- 图片通过静态 `GET` 路由在构建时输出到 `out/post-assets/<slug>/`，其中 `<slug>` 包含文章的分类路径。开发与部署使用相同的资源地址。
 - 只导出已发布文章中的图片，支持子目录与中文文件名。原始 MDX、JSON、隐藏文件、符号链接和草稿文章的图片不会作为独立资源导出。MDX 引用的图表数据会随页面打包给浏览器。
 - 默认的运行时图片优化已关闭；大图建议在放入文章目录前压缩并调整尺寸。
 - 文章正文、归档、目录与代码高亮在构建时完成；图表、菜单、复制代码和主题切换继续在浏览器中运行。
 - 内容更新后需要重新构建、发布 `out/`。旧的 `?page=2` 不再作为分页入口。
 
-首页与分页由 `app/[[...pagination]]/page.tsx` 统一生成，只有一页时也直接使用首页，无需额外的 `/page/1` 页面。文章详情仍由 `app/posts/[slug]/page.tsx` 生成。
+首页与分页由 `app/[[...pagination]]/page.tsx` 统一生成，只有一页时也直接使用首页，无需额外的 `/page/1` 页面。文章详情由 `app/posts/[...slug]/page.tsx` 生成。
 
 ## 新增文章
 
-新建 `content/posts/<slug>/index.mdx`。slug 使用小写英文、数字和连字符，它决定文章 URL `/posts/<slug>`。修改标题不会改变 URL。
+在 `content/posts/` 下按分类建目录，每层目录名使用小写英文、数字和连字符。扫描遇到 `index.mdx` 就把该目录识别为一篇文章，其子目录用于存放这篇文章的资源。文章 URL 取完整目录路径，例如 `content/posts/engineering/typescript/my-first-post/index.mdx` 对应 `/posts/engineering/typescript/my-first-post/`。
 
 ```text
-content/posts/my-first-post/
+content/posts/engineering/typescript/my-first-post/
 ├── index.mdx
 ├── cover.webp
 ├── chart-data.json
@@ -124,7 +124,7 @@ import chartData from "./chart-data.json"
 
 目录在 MDX 编译时由 `@stefanprobst/rehype-extract-toc` 及其 `/mdx` 插件导出为 `tableOfContents`，与 `rehype-slug` 共用真实标题 ID，支持中文、重复标题、行内格式和一到六级标题。代码围栏和自动生成的脚注标题不会进入目录；没有标题的文章不显示目录，也不预留侧栏。无需在 MDX 正文中手写目录，`tableOfContents` 为插件保留的导出名称。
 
-配置在 `next.config.ts`，目录数据整理在 `lib/post-toc.ts`，交互与布局在 `components/post-table-of-contents/index.tsx` 和 `app/posts/[slug]/page.tsx`。
+配置在 `next.config.ts`，目录数据整理在 `lib/post-toc.ts`，交互与布局在 `components/post-table-of-contents/index.tsx` 和 `app/posts/[...slug]/page.tsx`。
 
 ## 扩展正文组件
 

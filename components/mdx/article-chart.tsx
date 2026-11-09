@@ -26,8 +26,8 @@ export default function ArticleChart({
   data,
   xKey,
   yKey,
-  xLabel = "日期",
-  yLabel = "数值",
+  xLabel = "Date",
+  yLabel = "Value",
 }: ArticleChartProps) {
   return (
     <figure className="not-typeset my-8 min-w-0 rounded-xl border bg-card p-4 text-base text-card-foreground sm:p-6">
@@ -83,7 +83,7 @@ export default function ArticleChart({
               }}
               labelStyle={{ color: "var(--muted-foreground)" }}
               formatter={(value) => [
-                Number(value).toLocaleString("zh-CN"),
+                Number(value).toLocaleString("en-US"),
                 yLabel,
               ]}
             />
@@ -103,11 +103,11 @@ export default function ArticleChart({
 
       <details className="mt-5 border-t pt-4 text-sm">
         <summary className="w-fit cursor-pointer rounded-sm text-muted-foreground hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring">
-          查看图表数据
+          View chart data
         </summary>
         <div className="mt-4 overflow-x-auto">
           <table className="w-full text-left text-sm tabular-nums">
-            <caption className="sr-only">{title}的数据表</caption>
+            <caption className="sr-only">Data table for {title}</caption>
             <thead>
               <tr className="border-b">
                 <th scope="col" className="py-2 font-medium">
