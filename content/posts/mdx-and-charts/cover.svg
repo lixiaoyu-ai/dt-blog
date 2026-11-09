@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" fill="none">
+  <rect width="1200" height="675" fill="oklch(0.963 0.004 160)"/>
+  <g stroke="oklch(0.893 0.01 160)" stroke-width="2">
+    <path d="M130 145H1070M130 245H1070M130 345H1070M130 445H1070M130 545H1070"/>
+    <path d="M130 145V545M365 145V545M600 145V545M835 145V545M1070 145V545"/>
+  </g>
+  <path d="M130 510L287 430L443 470L600 324L757 350L913 150L1070 217V545H130Z" fill="oklch(0.925 0.009 160)"/>
+  <path d="M130 510L287 430L443 470L600 324L757 350L913 150L1070 217" stroke="oklch(0.4 0.035 160)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <g fill="oklch(0.963 0.004 160)" stroke="oklch(0.4 0.035 160)" stroke-width="6">
+    <circle cx="130" cy="510" r="10"/><circle cx="287" cy="430" r="10"/><circle cx="443" cy="470" r="10"/><circle cx="600" cy="324" r="10"/><circle cx="757" cy="350" r="10"/><circle cx="913" cy="150" r="10"/><circle cx="1070" cy="217" r="10"/>
+  </g>
+</svg>

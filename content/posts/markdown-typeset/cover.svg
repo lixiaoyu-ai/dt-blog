@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" fill="none">
+  <rect width="1200" height="675" fill="oklch(0.963 0.004 160)"/>
+  <rect x="72" y="64" width="1056" height="547" rx="12" fill="oklch(0.985 0.002 160)" stroke="oklch(0.893 0.01 160)" stroke-width="2"/>
+  <g font-family="Arial, Helvetica, sans-serif" fill="oklch(0.4 0.035 160)">
+    <text x="120" y="142" font-size="24" letter-spacing="3">TYPESET</text>
+    <text x="108" y="420" font-size="270" font-weight="600" letter-spacing="-20">Aa</text>
+    <text x="120" y="536" font-size="25">Markdown</text>
+  </g>
+  <path d="M536 112V563" stroke="oklch(0.893 0.01 160)" stroke-width="2"/>
+  <g stroke-linecap="round">
+    <path d="M600 155H991" stroke="oklch(0.4 0.035 160)" stroke-width="16"/>
+    <path d="M600 211H1040M600 242H1014M600 273H890" stroke="oklch(0.78 0.012 160)" stroke-width="8"/>
+    <path d="M600 342H867" stroke="oklch(0.4 0.035 160)" stroke-width="12"/>
+    <path d="M634 396H1039M634 434H941M634 472H1008" stroke="oklch(0.78 0.012 160)" stroke-width="8"/>
+    <path d="M600 534H1040" stroke="oklch(0.893 0.01 160)" stroke-width="2"/>
+  </g>
+  <g fill="oklch(0.4 0.035 160)">
+    <circle cx="604" cy="396" r="5"/>
+    <circle cx="604" cy="434" r="5"/>
+    <circle cx="604" cy="472" r="5"/>
+  </g>
+</svg>

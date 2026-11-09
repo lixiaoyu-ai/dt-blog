@@ -1,0 +1,81 @@
+---
+title: "让文章不止于文字：在 MDX 中加入图表"
+description: "把正文、元信息和图表数据放在一起，用一个组件为文章补充可交互的数据表达。"
+publishedAt: "2026-11-08"
+tags: ["MDX", "数据可视化", "写作"]
+cover: "./cover.svg"
+draft: false
+---
+
+import chartData from "./chart-data.json"
+
+## 从文字到数据
+
+有些变化，用一段话就能说清楚；有些趋势，画出来会更容易理解。MDX 让我们保留 Markdown 的写作体验，也能在合适的地方插入一个 React 组件。
+
+下面是一组**演示数据**，展示一周的文章阅读量，不代表这个博客的实际访问情况。移动鼠标或点按图表，可以查看每一天的数值；也可以展开下方的数据表。
+
+<ArticleChart
+  title="这一周，文章被读了多少次？"
+  description="示例数据 · 单位：次"
+  data={chartData}
+  xKey="day"
+  yKey="views"
+  xLabel="日期"
+  yLabel="阅读量"
+/>
+
+## 正文里只保留需要表达的内容
+
+这张图表在文章里只需要这样写：
+
+```mdx
+import chartData from "./chart-data.json"
+
+<ArticleChart
+  title="这一周，文章被读了多少次？"
+  data={chartData}
+  xKey="day"
+  yKey="views"
+  xLabel="日期"
+  yLabel="阅读量"
+/>
+```
+
+图表的坐标轴、提示框和深色模式由组件统一处理。以后调整图表样式，不必逐篇修改文章。
+
+## 把数据留在文章旁边
+
+正文、封面、配图和图表数据保存在同一个文章目录里。复制整个目录，就能带走这篇文章的全部内容。
+
+![文章目录结构：index.mdx、cover.svg 和 chart-data.json 保存在同一个文件夹中](./images/content-layout.svg)
+
+图片直接使用相对路径，例如 `![配图说明](./images/content-layout.svg)`。封面也一样，在 frontmatter 中写 `cover: "./cover.svg"` 即可。
+
+专属于这篇文章的数据放在同目录的 `chart-data.json`。文件内容是一个普通数组：
+
+```json
+[
+  { "day": "周一", "views": 120 },
+  { "day": "周二", "views": 180 }
+]
+```
+
+写文章时，可以按下面的分工维护：
+
+| 内容                   | 维护位置               |
+| ---------------------- | ---------------------- |
+| 标题、摘要、日期和标签 | MDX 顶部的 frontmatter |
+| 正文和图表的使用位置   | `index.mdx`            |
+| 这篇文章的图表数据     | `chart-data.json`      |
+| 这篇文章的封面图片     | 同目录的 `cover.svg`   |
+| 图表交互和公共样式     | `ArticleChart` 组件    |
+
+## 发布之前
+
+- 确认标题和摘要能准确描述正文。
+- 检查图表的数据来源、单位和说明。
+- 在手机和深色模式下读一遍文章。
+- 准备好以后，将 frontmatter 中的 `draft` 设为 `false`。
+
+> 图表的作用是帮助读者理解文章。即使不操作图表，正文和数据表也应该能传达完整信息。

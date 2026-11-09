@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="360" viewBox="0 0 960 360" fill="none">
+  <rect width="960" height="360" rx="16" fill="oklch(0.963 0.004 160)"/>
+  <g stroke="oklch(0.82 0.012 160)" stroke-width="2">
+    <path d="M72 110V280M72 140H106M72 210H106M72 280H106"/>
+  </g>
+  <g fill="oklch(0.32 0.025 160)" font-family="ui-monospace, SFMono-Regular, monospace" font-size="24">
+    <text x="48" y="72">content/posts/my-post/</text>
+    <text x="128" y="148">index.mdx</text>
+    <text x="128" y="218">cover.svg</text>
+    <text x="128" y="288">chart-data.json</text>
+  </g>
+  <g fill="oklch(0.5 0.02 160)" font-family="system-ui, sans-serif" font-size="22">
+    <text x="650" y="148">文章正文与元信息</text>
+    <text x="650" y="218">文章封面</text>
+    <text x="650" y="288">图表数据</text>
+  </g>
+</svg>
